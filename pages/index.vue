@@ -10,10 +10,16 @@
     </p>
     <div class="grid grid-cols-2 gap-5">
       <div class="m-5 px-4 py-8 bg-white shadow rounded">
-        <form>
-          <input type="file" />
+        <form @submit.prevent="handleVideoUpload">
+          <input
+            type="file"
+            name="file"
+            @change="handleVideo"
+            accept="video/*"
+            required
+          />
           <button
-            type="button"
+            type="submit"
             class="
               inline-flex
               items-center
@@ -35,10 +41,16 @@
         </form>
       </div>
       <div v-if="video" class="m-5 px-4 py-8 bg-white shadow rounded">
-        <form>
-          <input type="file" />
+        <form @submit.prevent="handleAudioUpload">
+          <input
+            type="file"
+            name="file"
+            @change="handleAudio"
+            accept="audio/*"
+            required
+          />
           <button
-            type="button"
+            type="submit"
             class="
               inline-flex
               items-center
@@ -113,9 +125,44 @@
 export default {
   data() {
     return {
+      uploadVideo: null,
+      uploadAudio: null,
       video: null,
       audios: [],
     };
+  },
+  methods: {
+    handleVideo(e) {
+      this.uploadVideo = e.target.files[0];
+    },
+    handleAudio(e) {
+      this.uploadAudio = e.target.files[0];
+    },
+    async handleVideoUpload(e) {
+      const fileData = await this.readData(this.uploadVideo);
+
+      this.video = await this.$cloudinary.upload(fileData, {
+        upload_preset: "default-preset",
+        folder: "nuxtjs-audio-track-change",
+      });
+    },
+    async handleAudioUpload(e) {
+      const fileData = await this.readData(this.uploadAudio);
+
+      const audio = await this.$cloudinary.upload(fileData, {
+        upload_preset: "default-preset",
+        folder: "nuxtjs-audio-track-change",
+      });
+
+      this.audios.push(audio);
+    },
+    async readData(f) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(f);
+      });
+    },
   },
 };
 </script>
