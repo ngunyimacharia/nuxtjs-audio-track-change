@@ -10,17 +10,20 @@
     </p>
     <div class="grid grid-cols-2 gap-5">
       <div class="m-5 px-4 py-8 bg-white shadow rounded">
-        <form @submit.prevent="handleVideoUpload">
+        <form class="text-center" @submit.prevent="handleVideoUpload">
           <input
             type="file"
             name="file"
             @change="handleVideo"
             accept="video/*"
             required
+            class="block mx-auto"
           />
           <button
             type="submit"
+            :disabled="uploadingVideo"
             class="
+              block
               inline-flex
               items-center
               px-4
@@ -34,10 +37,12 @@
               hover:bg-indigo-200
               focus:outline-none
               focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+              my-5
             "
           >
             Upload Video
           </button>
+          <div v-if="uploadingVideo" class="text-sm">Uploading video...</div>
         </form>
       </div>
       <div v-if="video" class="m-5 px-4 py-8 bg-white shadow rounded">
@@ -48,10 +53,13 @@
             @change="handleAudio"
             accept="audio/*"
             required
+            class="block mx-auto"
           />
           <button
             type="submit"
+            :disabled="uploadingAudio"
             class="
+              block
               inline-flex
               items-center
               px-4
@@ -65,10 +73,12 @@
               hover:bg-indigo-200
               focus:outline-none
               focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+              my-5
             "
           >
             Upload Audio
           </button>
+          <div v-if="uploadingAudio" class="text-sm">Uploading audio...</div>
         </form>
       </div>
     </div>
@@ -127,6 +137,8 @@ export default {
     return {
       uploadVideo: null,
       uploadAudio: null,
+      uploadingVideo: false,
+      uploadingAudio: false,
       video: null,
       audios: [],
     };
@@ -139,14 +151,20 @@ export default {
       this.uploadAudio = e.target.files[0];
     },
     async handleVideoUpload(e) {
+      this.uploadingVideo = true;
+
       const fileData = await this.readData(this.uploadVideo);
 
       this.video = await this.$cloudinary.upload(fileData, {
         upload_preset: "default-preset",
         folder: "nuxtjs-audio-track-change",
       });
+
+      this.uploadVideo = false;
     },
     async handleAudioUpload(e) {
+      this.uploadingAudio = true;
+
       const fileData = await this.readData(this.uploadAudio);
 
       const audio = await this.$cloudinary.upload(fileData, {
@@ -155,6 +173,8 @@ export default {
       });
 
       this.audios.push(audio);
+
+      this.uploadingAudio = false;
     },
     async readData(f) {
       return new Promise((resolve) => {
