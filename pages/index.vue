@@ -160,7 +160,7 @@ export default {
         folder: "nuxtjs-audio-track-change",
       });
 
-      this.uploadVideo = false;
+      this.uploadingVideo = false;
     },
     async handleAudioUpload(e) {
       this.uploadingAudio = true;
